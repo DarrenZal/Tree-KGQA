@@ -7,6 +7,7 @@ from utils.api import API
 from utils.miscellaneous import get_fuzzy_match
 from utils.metrics import eval
 from datetime import datetime
+from sentence_transformers import SentenceTransformer
 
 
 class EntityLinker:
@@ -27,6 +28,7 @@ class EntityLinker:
     def detect_spans(self, single_data, candidate_entity_info, lower=False):
         # step 1: NER mention span detection
         cand_mentions, ner_found = self.ner.get_entity_spans(single_data["question"].lower() if lower else single_data["question"], lower=lower)
+        print("NER output:", self.ner.get_entity_spans(single_data["question"].lower() if lower else single_data["question"], lower=lower))
 
         # if span not detected by the NER, then paraphrase the question and perform NER again
         paraphrased = False
@@ -53,7 +55,7 @@ class EntityLinker:
                 for cand_ment in cand_mentions:
                     candidate_entity_info, _ = self.get_api_result(cand_ment,candidate_entity_info,single_data,paraphrased, lower=lower)
 
-        else:                                                  # if nothing is specified, by default it performs indexing
+        else:  # if nothing is specified, by default it performs indexing
             candidate_entity_info = self.get_indexed_result(single_data["question"], candidate_entity_info, single_data, paraphrased, lower=lower)
 
         return candidate_entity_info.copy()
@@ -138,7 +140,12 @@ class EntityLinker:
 
 
     def get_indexed_result(self, cand_ment, candidate_entity_info, single_data, paraphrased, lower=False, force=False):
-
+        print("cand_ment:", cand_ment)
+        print("candidate_entity_info:", candidate_entity_info)
+        print("single_data:", single_data)
+        print("paraphrased:", paraphrased)
+        print("lower:", lower)
+        print("force:", force)
         indexed_labels, indexed_ids = self.indexer.lookup(cand_ment, topk=self.topk)
         question  = single_data["question"].lower() if lower else single_data["question"]
         found_ya = False
@@ -196,6 +203,7 @@ class EntityLinker:
         """save prediction in a file"""
         prediction_dir = f"outputs/{'ablation' if self.args.ablation else 'EL'}/"
         dt_fmt = datetime.now().strftime("%d-%b-%Y_%H:%M:%S.%f")
-        filename = f"EL_{self.args.dataset}_RL-{self.args.RL_method}_ELdisamb-{self.args.EL_disamb}_API-{'yes' if self.args.use_api else 'no'}_Indexing-{'yes' if self.args.use_indexing else 'no'}_paraphrase-{'yes' if self.args.paraphrase_q else 'no'}_uncased-{'yes' if self.args.uncased else 'no'}_KG-{self.args.kg}_{dt_fmt}.json"
+        paraphrase_q_value = getattr(self.args, "paraphrase_q", False) 
+        filename = f"EL_{self.args.dataset}_RL-{self.args.RL_method}_ELdisamb-{self.args.EL_disamb}_API-{'yes' if self.args.use_api else 'no'}_Indexing-{'yes' if self.args.use_indexing else 'no'}_paraphrase-{'yes' if paraphrase_q_value else 'no'}_uncased-{'yes' if self.args.uncased else 'no'}_KG-{self.args.kg}_{dt_fmt}.json"
         filename = filename.replace(":","-")
         json.dump(self.prediction, open(add_paths(prediction_dir, filename),"w"), indent=3)

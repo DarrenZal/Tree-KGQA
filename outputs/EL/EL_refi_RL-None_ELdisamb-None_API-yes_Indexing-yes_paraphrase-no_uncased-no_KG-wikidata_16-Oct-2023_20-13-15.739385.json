@@ -1,0 +1,36 @@
+[
+   {
+      "question": "Who is Monty",
+      "original_question": "Who is Monty?",
+      "wikidata_id": [
+         "Q766"
+      ],
+      "wikidata_entity": [
+         "Jamaica"
+      ],
+      "mentions": [
+         "ty?"
+      ],
+      "mentions_boundary": [
+         [
+            10,
+            18
+         ]
+      ],
+      "pred_wikiid": [
+         "Q33100530"
+      ],
+      "pred_wikilabel": [
+         "Monty"
+      ],
+      "mention": [
+         "Monty"
+      ],
+      "mention_boundary": [
+         [
+            7,
+            12
+         ]
+      ]
+   }
+]

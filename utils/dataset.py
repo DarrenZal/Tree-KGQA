@@ -19,6 +19,8 @@ class Dataset:
             self.data = self.load_qald7()
         elif dataset_name == "webqsp-wd":
             self.data = self.load_webqsp_wd()
+        elif dataset_name == "refi":
+            self.data = self.load_refi()
         else:
             raise DatasetNotFoundException(dataset=dataset_name)
 
@@ -135,6 +137,22 @@ class Dataset:
                 "original_mentions": mentions
             })
         return webqsp_wd
+    
+    
+    def load_refi(self):
+        d = json.load(open('data/refi/refi_test.json'))
+        refi = list()
+        for item in tqdm(d, desc="Reading WebQSP: "):
+            if type(item["text"])==str and len(item["text"])>0:
+                refi.append({
+                    "question": self.process_question(item["text"], lower=True if self.args.uncased else False),
+                    "original_question": item["text"],
+                    "wikidata_id": item["wikidata_id"],
+                    "wikidata_entity": item["entity"],
+                    "mentions": [item["text"][boundary[0]:boundary[1]] for boundary in item["mentions"]],
+                    "mentions_boundary": item["mentions"]
+                })
+        return refi
 
 
     def process_question(self, text, lower=True):

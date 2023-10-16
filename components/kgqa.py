@@ -10,7 +10,7 @@ from gensim.models import fasttext
 from sentence_transformers import SentenceTransformer
 from components.bart_zeroshot_classifier import BARTClassifier
 from components.relation_linking_embedding import WikidataPropertiesMatcher
-from components.relation_linking_graphlaplacian import GraphLaplacian
+#from components.relation_linking_graphlaplacian import GraphLaplacian
 
 class KGQA:
     def __init__(self, entity_linker, data, args):
@@ -40,9 +40,10 @@ class KGQA:
             self.zs_classifier = BARTClassifier(args=args)
             print("Selecting embedding based relation matcher")
         else:
-            self.prop_matcher = GraphLaplacian(self.args, self.vec, self.id2r, self.r2id, onehop = self.onehop)
-            self.zs_classifier = None
-            print("Selecting Graph-Laplacian based relation matcher")
+            #self.prop_matcher = GraphLaplacian(self.args, self.vec, self.id2r, self.r2id, onehop = self.onehop)
+            #self.zs_classifier = None
+            #print("Selecting Graph-Laplacian based relation matcher")
+            print("GraphLaplacian not implemented")
 
 
 
