@@ -47,8 +47,12 @@ class EntityLinker:
             else:
                 candidate_entity_info = self.get_indexed_result(single_data["question"], candidate_entity_info, single_data, paraphrased, lower=lower)
 
-        elif self.args.use_indexing:                           # only using indexing method for candidate generation
-            candidate_entity_info = self.get_indexed_result(single_data["question"], candidate_entity_info, single_data, paraphrased, lower=lower, force=False)
+        elif self.args.use_indexing: 
+            if ner_found: 
+                for cand_ment in cand_mentions:
+                    candidate_entity_info = self.get_indexed_result(cand_ment, candidate_entity_info,single_data, paraphrased, lower=lower)# only using indexing method for candidate generation
+            else:
+                candidate_entity_info = self.get_indexed_result(single_data["question"], candidate_entity_info, single_data, paraphrased, lower=lower, force=False)
 
         elif self.args.use_api:                                # only using API call method for candidate generation
             if ner_found:                                      # if found entity by NER or NER over paraphrased question
@@ -146,7 +150,10 @@ class EntityLinker:
         print("paraphrased:", paraphrased)
         print("lower:", lower)
         print("force:", force)
+        print("cand_ment", cand_ment)
         indexed_labels, indexed_ids = self.indexer.lookup(cand_ment, topk=self.topk)
+        print("indexed_labels:", indexed_labels)
+        print("indexed_ids:", indexed_ids)
         question  = single_data["question"].lower() if lower else single_data["question"]
         found_ya = False
         # identify mention boundary

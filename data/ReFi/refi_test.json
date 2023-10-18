@@ -1,2 +1,2 @@
-[{"id": "WebQTest-0", "text": "Who is Monty?", "mentions": [[10, 18]], "label_id": [0], "wikidata_id": ["Q766"], "entity": [""], "label": [" "], "entities_fb": ["m.03_r3"], "main_entity_idx": 0, "entity_classes": ["location"]}
+[{"id": "WebQTest-0", "text": "What organization does Monty Merlin Bryant work with?", "mentions": [[0, 0]], "label_id": [0], "wikidata_id": [""], "entity": [""], "label": [" "], "entities_fb": [""], "main_entity_idx": 0, "entity_classes": [""]}
 ]

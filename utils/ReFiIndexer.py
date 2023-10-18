@@ -10,7 +10,7 @@ from sentence_transformers import SentenceTransformer
 import json
 from faiss_util import DenseHNSWFlatIndexer
 from datetime import datetime
-
+import numpy as np
 
 def get_args():
     parser = ArgumentParser(description="Entity indexer")
@@ -25,47 +25,65 @@ def main(args):
 
     data, idx2entity, idx2id = list(), dict(), dict()
     start_time = datetime.now()
-    
-    # Load your specific JSON files here
+    global_index = 0
+    index_to_entity_id = []
+
     with open("utils/combined_data.json") as f:
-        json_data = json.load(f)["profiles_json_ld"]
-        
-        for i, item in enumerate(json_data):
-            
-            # Index name and description for all, with some exceptions
-            if "name" in item:
-                data.append(item["name"])
-                idx2entity[i] = item["name"]
-                
-            if "description" in item:
-                data.append(item["description"])
-                idx2entity[i] = item["description"]
-            
-            # For specific object types
-            if "@type" in item and item["@type"] == "events_JSON_ld":
-                if "about" in item:
-                    data.append(item["about"])
-                    idx2entity[i] = item["about"]
-            
-            if "@type" in item and item["@type"] == "content_JSON_ld":
-                for field in ["keywords", "url", "imageURL", "excerpt"]:
-                    if field in item:
-                        data.append(item[field])
-                        idx2entity[i] = item[field]
-            
-            # Add @type indexing here
-            if "@type" in item:
-                data.append(item["@type"])
-                idx2entity[i] = item["@type"]
+        all_data = json.load(f)
 
-            # Capturing the "@id" value for idx2id
-            if "@id" in item:
-                idx2id[i] = item["@id"]
-            else:
-                idx2id[i] = None
+        for entity_type, entity_list in all_data.items():
+            for i, item in enumerate(entity_list):
 
+                if item is None:
+                    continue
+
+                entity_value = None
+                if "name" in item:
+                    entity_value = item["name"]
+                    data.append(entity_value)
+                    idx2entity[global_index] = entity_value
+                    index_to_entity_id.append(global_index)
+                    global_index += 1
+
+                if "description" in item:
+                    entity_value = item["description"]
+                    data.append(entity_value)
+                    idx2entity[global_index] = entity_value
+                    index_to_entity_id.append(global_index)
+                    global_index += 1
+
+                if "@type" in item:
+                    entity_value = item["@type"]
+                    data.append(entity_value)
+                    idx2entity[global_index] = entity_value
+                    index_to_entity_id.append(global_index)
+                    global_index += 1
+
+                    if item["@type"] == "events_JSON_ld" and "about" in item:
+                        data.append(item["about"])
+                        idx2entity[global_index] = item["about"]
+                        index_to_entity_id.append(global_index)
+                        global_index += 1
+
+                    elif item["@type"] == "content_JSON_ld":
+                        for field in ["keywords", "url", "imageURL", "excerpt"]:
+                            if field in item:
+                                data.append(item[field])
+                                idx2entity[global_index] = item[field]
+                                index_to_entity_id.append(global_index)
+                                global_index += 1
+
+                if "@id" in item:
+                    idx2id[global_index - 1] = item["@id"]  # Use global_index - 1 because global_index was already incremented
+                else:
+                    idx2id[global_index - 1] = None
+
+
+                    
     print('Data loading Duration: {}'.format(datetime.now() - start_time))
     start_time = datetime.now()
+    
+    json.dump(index_to_entity_id, open("data/wikidata/index_to_entity_id.json", "w"))
     json.dump(idx2entity,open("data/wikidata/i2e.json","w"), ensure_ascii=False)
     json.dump(idx2id, open("data/wikidata/i2id.json", "w"), ensure_ascii=False)
     print('Data saving Duration: {}'.format(datetime.now() - start_time))
