@@ -26,7 +26,6 @@ def main(args):
     data, idx2entity, idx2id = list(), dict(), dict()
     start_time = datetime.now()
     global_index = 0
-    index_to_entity_id = []
 
     with open("utils/combined_data.json") as f:
         all_data = json.load(f)
@@ -38,31 +37,34 @@ def main(args):
                     continue
 
                 entity_value = None
+                # List to store the indices of all entities extracted from the current item
+                current_item_indices = []
+
                 if "name" in item:
                     entity_value = item["name"]
                     data.append(entity_value)
                     idx2entity[global_index] = entity_value
-                    index_to_entity_id.append(global_index)
+                    current_item_indices.append(global_index)
                     global_index += 1
 
                 if "description" in item:
                     entity_value = item["description"]
                     data.append(entity_value)
                     idx2entity[global_index] = entity_value
-                    index_to_entity_id.append(global_index)
+                    current_item_indices.append(global_index)
                     global_index += 1
 
                 if "@type" in item:
                     entity_value = item["@type"]
                     data.append(entity_value)
                     idx2entity[global_index] = entity_value
-                    index_to_entity_id.append(global_index)
+                    current_item_indices.append(global_index)
                     global_index += 1
 
                     if item["@type"] == "events_JSON_ld" and "about" in item:
                         data.append(item["about"])
                         idx2entity[global_index] = item["about"]
-                        index_to_entity_id.append(global_index)
+                        current_item_indices.append(global_index)
                         global_index += 1
 
                     elif item["@type"] == "content_JSON_ld":
@@ -70,20 +72,22 @@ def main(args):
                             if field in item:
                                 data.append(item[field])
                                 idx2entity[global_index] = item[field]
-                                index_to_entity_id.append(global_index)
+                                current_item_indices.append(global_index)
                                 global_index += 1
 
+                # Associate the @id with all entities extracted from the current item
                 if "@id" in item:
-                    idx2id[global_index - 1] = item["@id"]  # Use global_index - 1 because global_index was already incremented
+                    for idx in current_item_indices:
+                        idx2id[idx] = item["@id"]
                 else:
-                    idx2id[global_index - 1] = None
+                    for idx in current_item_indices:
+                        idx2id[idx] = None
 
 
                     
     print('Data loading Duration: {}'.format(datetime.now() - start_time))
     start_time = datetime.now()
     
-    json.dump(index_to_entity_id, open("data/wikidata/index_to_entity_id.json", "w"))
     json.dump(idx2entity,open("data/wikidata/i2e.json","w"), ensure_ascii=False)
     json.dump(idx2id, open("data/wikidata/i2id.json", "w"), ensure_ascii=False)
     print('Data saving Duration: {}'.format(datetime.now() - start_time))

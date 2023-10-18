@@ -150,10 +150,7 @@ class EntityLinker:
         print("paraphrased:", paraphrased)
         print("lower:", lower)
         print("force:", force)
-        print("cand_ment", cand_ment)
         indexed_labels, indexed_ids = self.indexer.lookup(cand_ment, topk=self.topk)
-        print("indexed_labels:", indexed_labels)
-        print("indexed_ids:", indexed_ids)
         question  = single_data["question"].lower() if lower else single_data["question"]
         found_ya = False
         # identify mention boundary

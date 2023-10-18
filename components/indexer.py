@@ -22,13 +22,10 @@ class Indexer:
         indexer = DenseHNSWFlatIndexer(1)
         indexer.deserialize_from("data/ReFi/indexed_ReFi_entities.pkl")
 
-        with open("data/wikidata/index_to_entity_id.json", "r") as file:
-            index_to_entity_id = json.load(file)
 
         return {
             "i2e": i2e,
             "i2id": i2id,
-            "index_to_entity_id": index_to_entity_id,
             "indexer": indexer,
             "encoder": encoder
         }
@@ -42,8 +39,9 @@ class Indexer:
         """
         query_vector = self.indexer["encoder"].encode([text])
         sc, e_id = self.indexer["indexer"].search_knn(query_vector, topk)  # 1 -> means top entity
-        print("Entity IDs:", e_id)
-        return [self.indexer["i2e"].get(str(self.indexer["index_to_entity_id"][e_id[0][i]]), "Unknown") for i in range(topk)],\
-               [self.indexer["i2id"].get(str(self.indexer["index_to_entity_id"][e_id[0][i]]), "Unknown") for i in range(topk)]
+        print("Entity IDs here:", e_id)
+        print("e_id[0][0]:", e_id[0][0])
+        return [self.indexer["i2e"][str(e_id[0][i])] for i in range(topk)],\
+               [self.indexer["i2id"][str(e_id[0][i])] for i in range(topk)]
 
 
